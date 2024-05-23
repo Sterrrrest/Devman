@@ -7,10 +7,11 @@ env = Env()
 env.read_env()
 tg_token = env('TG_TOKEN')
 chat_id = env('CLIENT_ID')
+devman_token = env('DEVMAN_TOKEN')
 url = 'https://dvmn.org/api/user_reviews/'
 url_long = 'https://dvmn.org/api/long_polling/'
 headers = {
-    "Authorization": 'Token 0a1c56bfcf0da29bcb874b92b3cf4a1aaa3c4b50'
+    "Authorization": f'Token {devman_token}'
 }
 
 bot = telebot.TeleBot(token=tg_token)
