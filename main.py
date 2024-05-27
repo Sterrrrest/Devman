@@ -24,19 +24,21 @@ if __name__ == '__main__':
         try:
             response = requests.get(url_long, headers=headers)
             response.raise_for_status()
-            if response.json()['status'] == 'timeout':
+            response_check = response.json()
+            if response_check['status'] == 'timeout':
 
-                response_timestamp = response.json()['timestamp_to_request']
+                response_timestamp = response_check['timestamp_to_request']
                 payLoad_last_attempt = {
                     'timestamp': response_timestamp
                 }
                 response_last_attempt = requests.get(url_long, headers=headers, params=payLoad_last_attempt)
                 response_last_attempt.raise_for_status()
-                if response_last_attempt.json()['found']:
-                    send_message(response_last_attempt, tg_token, tg_chat_id)
+                response_check_last_attempt = response_last_attempt.json()
+                if response_check_last_attempt['found']:
+                    send_message(response_check_last_attempt, tg_token, tg_chat_id)
             else:
-                if response.json()['new_attempts'][0]['is_negative']:
-                    send_message(response, tg_token, tg_chat_id)
+                if response_check['new_attempts'][0]['is_negative']:
+                    send_message(response_check, tg_token, tg_chat_id)
 
         except requests.exceptions.ReadTimeout:
             time.sleep(5)
