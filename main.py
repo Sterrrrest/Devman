@@ -22,7 +22,7 @@ if __name__ == '__main__':
     while True:
 
         try:
-            response = requests.get(url_long, headers=headers)
+            response = requests.get(url_long, headers=headers, timeout=5)
             response.raise_for_status()
             response_check = response.json()
             if response_check['status'] == 'timeout':
@@ -31,7 +31,7 @@ if __name__ == '__main__':
                 payLoad_last_attempt = {
                     'timestamp': response_timestamp
                 }
-                response_last_attempt = requests.get(url_long, headers=headers, params=payLoad_last_attempt)
+                response_last_attempt = requests.get(url_long, headers=headers, params=payLoad_last_attempt, timeout=5)
                 response_last_attempt.raise_for_status()
                 response_check_last_attempt = response_last_attempt.json()
                 if response_check_last_attempt['status'] == 'found':
@@ -39,7 +39,5 @@ if __name__ == '__main__':
             else:
                 send_message(response_check, tg_token, tg_chat_id)
 
-        except requests.exceptions.ReadTimeout:
-            time.sleep(5)
         except requests.ConnectionError:
             time.sleep(30)
