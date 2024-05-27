@@ -32,7 +32,6 @@ if __name__ == '__main__':
                     'timestamp': response_timestamp
                 }
                 response_last_attempt = requests.get(url_long, headers=headers, params=payLoad_last_attempt, timeout=5)
-                response_last_attempt.raise_for_status()
                 response_check_last_attempt = response_last_attempt.json()
                 if response_check_last_attempt['status'] == 'found':
                     send_message(response_check_last_attempt, tg_token, tg_chat_id)
