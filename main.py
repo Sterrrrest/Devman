@@ -1,7 +1,7 @@
 import time
 import requests
 
-from functions import send_message
+from send_message import send_message
 from environs import Env
 
 
