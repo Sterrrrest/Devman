@@ -10,7 +10,7 @@ if __name__ == '__main__':
     env = Env()
     env.read_env()
     tg_token = env('TG_TOKEN')
-    chat_id = env('CLIENT_ID')
+    tg_chat_id = env('TG_CHAT_ID')
     devman_token = env('DEVMAN_TOKEN')
 
     url = 'https://dvmn.org/api/user_reviews/'
@@ -33,10 +33,10 @@ if __name__ == '__main__':
                 response_last_attempt = requests.get(url_long, headers=headers, params=payLoad_last_attempt)
                 response_last_attempt.raise_for_status()
                 if response_last_attempt.json()['found']:
-                    send_message(response_last_attempt, tg_token, chat_id)
+                    send_message(response_last_attempt, tg_token, tg_chat_id)
             else:
                 if response.json()['new_attempts'][0]['is_negative']:
-                    send_message(response, tg_token, chat_id)
+                    send_message(response, tg_token, tg_chat_id)
 
         except requests.exceptions.ReadTimeout:
             time.sleep(5)
