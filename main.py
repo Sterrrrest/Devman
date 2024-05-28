@@ -19,24 +19,25 @@ if __name__ == '__main__':
         "Authorization": f'Token {devman_token}'
     }
 
+    timestamp = None
+
     while True:
 
         try:
-            response = requests.get(url_long, headers=headers, timeout=5)
+            payLoad = {
+                'timestamp': timestamp
+            }
+            response = requests.get(url_long, headers=headers, params=payLoad)
             response.raise_for_status()
             response_check = response.json()
-            if response_check['status'] == 'timeout':
 
-                response_timestamp = response_check['timestamp_to_request']
-                payLoad_last_attempt = {
-                    'timestamp': response_timestamp
-                }
-                response_last_attempt = requests.get(url_long, headers=headers, params=payLoad_last_attempt, timeout=5)
-                response_check_last_attempt = response_last_attempt.json()
-                if response_check_last_attempt['status'] == 'found':
-                    send_message(response_check_last_attempt, tg_token, tg_chat_id)
-            else:
+            if response_check['status'] == 'found':
                 send_message(response_check, tg_token, tg_chat_id)
+                timestamp = response_check['last_attempt_timestamp']
+            else:
+                timestamp = response_check['timestamp_to_request']
 
+        except requests.exceptions.ReadTimeout:
+            pass
         except requests.ConnectionError:
             time.sleep(30)
