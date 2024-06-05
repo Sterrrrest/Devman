@@ -29,13 +29,13 @@ if __name__ == '__main__':
             }
             response = requests.get(url_long, headers=headers, params=payLoad)
             response.raise_for_status()
-            response_check = response.json()
+            tasks_status = response.json()
 
-            if response_check['status'] == 'found':
-                send_message(response_check, tg_token, tg_chat_id)
-                timestamp = response_check['last_attempt_timestamp']
+            if tasks_status['status'] == 'found':
+                send_message(tasks_status, tg_token, tg_chat_id)
+                timestamp = tasks_status['last_attempt_timestamp']
             else:
-                timestamp = response_check['timestamp_to_request']
+                timestamp = tasks_status['timestamp_to_request']
 
         except requests.exceptions.ReadTimeout:
             pass
