@@ -4,8 +4,22 @@ import telebot
 import logging
 import traceback
 
-from send_message import send_message
+from textwrap import dedent
 from environs import Env
+
+
+logger = logging.getLogger("Debug")
+
+
+class TelegramLogsHandler(logging.Handler):
+    def __init__(self, tg_bot, tg_chat_id):
+        super().__init__()
+        self.tg_chat_id = tg_chat_id
+        self.tg_bot = tg_bot
+
+    def emit(self, record):
+        log_entry = self.format(record)
+        self.tg_bot.send_message(chat_id=self.tg_chat_id, text=log_entry)
 
 
 if __name__ == '__main__':
@@ -18,25 +32,11 @@ if __name__ == '__main__':
 
     devman_token = env('DEVMAN_TOKEN')
 
-    class TelegramLogsHandler(logging.Handler):
-        def __init__(self, tg_bot, tg_chat_id):
-            super().__init__()
-            self.tg_chat_id = tg_chat_id
-            self.tg_bot = tg_bot
-
-        def emit(self, record):
-            log_entry = self.format(record)
-            self.tg_bot.send_message(chat_id=self.tg_chat_id, text=log_entry)
-
     logging.basicConfig(level=logging.DEBUG, format="%(process)d %(levelname)s %(message)s %(asctime)s")
-
-    logger = logging.getLogger("Debug")
 
     logger.addHandler(TelegramLogsHandler(tg_bot, tg_chat_id))
     logger.setLevel(logging.INFO)
     logger.info('Старт бота')
-
-
 
     url = 'https://dvmn.org/api/user_reviews/'
     url_long = 'https://dvmn.org/api/long_polling/'
@@ -57,7 +57,19 @@ if __name__ == '__main__':
             tasks_status = response.json()
 
             if tasks_status['status'] == 'found':
-                send_message(tasks_status, tg_token, tg_chat_id)
+
+                if tasks_status['new_attempts'][0]['is_negative']:
+                    text_accept = dedent((f'''
+                    У вас проверили работу '{tasks_status['new_attempts'][0]['lesson_title']}'
+                    В ней есть ошибки
+                    Ссылка на работу: {tasks_status['new_attempts'][0]['lesson_url']}'''))
+
+                    tg_bot.send_message(chat_id=tg_chat_id, text=text_accept)
+                else:
+                    tg_bot.send_message(chat_id=tg_chat_id, text=dedent(f'''
+                    У вас проверили работу '{tasks_status['new_attempts'][0]['lesson_title']}'
+                    Работа принята!
+                    Ссылка на работу: {tasks_status['new_attempts'][0]['lesson_url']}'''))
                 timestamp = tasks_status['last_attempt_timestamp']
             else:
                 timestamp = tasks_status['timestamp_to_request']
@@ -69,4 +81,5 @@ if __name__ == '__main__':
         except Exception:
             logger.info('Бот упал с ошибкой:')
             logger.info(traceback.format_exc())
+            time.sleep(30)
 
